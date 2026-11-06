@@ -1,9 +1,13 @@
 ---
-title: "Fitting the outcome model"
-author: "Malcolm Barrett"
-institute: "Stanford University"
-format: "kakashi-revealjs"
+title: "Ajustando el modelo de resultado"
+author: "Miguel Angel Luque Fernandez"
+institute: "Departamento de Estadística e Investigación Operativa, UGR"
+format: kakashi-revealjs
 ---
+
+## {background-color="#23373B" .center .large}
+
+### Modelos de resultado para inferencia causal
 
 ```{r}
 #| label: setup
@@ -12,141 +16,50 @@ options(
   tibble.max_extra_cols = 6, 
   tibble.width = 60
 )
-library(tidyverse)
-library(broom)
-library(propensity)
-library(causaldata)
-nhefs_complete_uc <- nhefs_complete |>
-  filter(censored == 0)
 ```
 
-## Outcome Model {.large}
+## {background-color="#23373B" .center}
+
+### Una vez que tenemos nuestros pesos de probabilidad inversa, podemos ajustar un modelo de resultado para estimar el efecto causal.
+
+## Regresión simple vs. modelo ponderado
+
+El modelo de resultado para IPW solo incluye el resultado y la exposición, ya que los confusores son manejados por los pesos.
+
+## Modelo de resultado IPW
 
 ```{r}
-#| eval: false
-library(broom)
+#| code-line-numbers: "|1-2"
+ipw_model <- lm( 
+  wt82_71 ~ qsmk, 
+  data = nhefs_complete_uc, 
+  weights = wts 
+) 
 
-lm(outcome ~ exposure, data = df, weights = wts) |>
-  tidy()
-```
-
-. . .
-
-`r emo::ji("check")` This will get us the point estimate  
-
-. . .
-
-`r emo::ji("x")` This will get NOT us the correct confidence intervals  
-
-. . .
-
-`r emo::ji("package")` Let's bootstrap them with rsample
-
-## 1. Create a function to run your analysis once on a sample of your data
-
-::: {.small}
-
-```{r}
-#| code-line-numbers: "|1-2|5-13|16-18|21-22"
-fit_ipw <- function(.split, ...) {
-  .df <- as.data.frame(.split)
-  
-  # fit propensity score model
-  propensity_model <- glm(
-    qsmk ~ sex + 
-      race + age + I(age^2) + education + 
-      smokeintensity + I(smokeintensity^2) + 
-      smokeyrs + I(smokeyrs^2) + exercise + active + 
-      wt71 + I(wt71^2), 
-    family = binomial(), 
-    data = .df
-  )
-  
-  # calculate inverse probability weights
-  .df <- propensity_model |>
-    augment(type.predict = "response", data = .df) |>
-    mutate(wts = wt_ate(.fitted, qsmk, exposure_type = "binary"))
-  
-  # fit correctly bootstrapped ipw model
-  lm(wt82_71 ~ qsmk, data = .df, weights = wts) |>
-    tidy()
-}
-```
-:::
-
-## 2. Use {rsample} to bootstrap our causal effect
-
-```{r}
-#| code-line-numbers: "|4-8"
-#| output-location: slide
-library(rsample)
-
-# fit ipw model to bootstrapped samples
-bootstrapped_nhefs <- bootstraps(
-  nhefs_complete_uc, 
-  times = 1000, 
-  apparent = TRUE
-)
-
-bootstrapped_nhefs
-```
-
-## 2. Use {rsample} to bootstrap our causal effect
-
-```{r}
-fit_ipw(bootstrapped_nhefs$splits[[1]])
-```
-
-## 2. Use {rsample} to bootstrap our causal effect
-
-```{r}
-#| cache: true
-#| output-location: slide
-#| code-line-numbers: "|2"
-ipw_results <- bootstrapped_nhefs |> 
-  mutate(boot_fits = map(splits, fit_ipw)) 
-
-ipw_results
-```
-
-## 2. Use {rsample} to bootstrap our causal effect
-
-```{r}
-#| echo: false
-ipw_results |>
-  mutate(
-    estimate = map_dbl(
-      boot_fits,
-      # pull the `estimate` for `qsmk` for each fit
-      \(.fit) .fit |>
-        filter(term == "qsmk") |>
-        pull(estimate)
-    )
-  ) |>
-  ggplot(aes(estimate)) +
-  geom_histogram(fill = "#D55E00FF", color = "white", alpha = 0.8) + 
-  theme_minimal()
-```
-
-
-## 3. Pull out the causal effect
-
-```{r}
-#| code-line-numbers: "|2"
-#| output-location: fragment
-# get t-statistic-based CIs
-boot_estimate <- int_t(ipw_results, boot_fits) |> 
+ipw_estimate <- ipw_model |>
+  tidy(conf.int = TRUE) |
   filter(term == "qsmk")
 
-boot_estimate
+ipw_estimate
 ```
 
-## *Your Turn*
+## Estimación del efecto causal
 
-`r countdown::countdown(minutes = 8)`
+El estimado del efecto causal usando IPW es de aproximadamente 3.5 kg --las personas que dejan de fumar ganan alrededor de 3.5 kg de peso versus si no hubieran dejado de fumar.
 
-### Create a function called `ipw_fit` that fits the propensity score model and the weighted outcome model for the effect between `park_extra_magic_morning` and `wait_minutes_posted_avg`
+## Modelos de resultado g-computación
 
-### Using the `bootstraps()` and `int_t()` functions to estimate the final effect.
+Otra técnica para estimar efectos causales es la g-computación, que implica:
 
+1. Ajustar un modelo de resultado con todas las covariables
+2. Predecir el resultado para cada observación bajo cada nivel de exposición
+3. Promediar las predicciones para obtener el efecto marginal
 
+## {background-color="#23373B" .center .large}
+
+### **Más sobre g-computación en la sección de exposiciones continuas**
+
+## {.tiny}
+
+### [Inferencia Causal](https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/): Texto completo sobre inferencia causal. Gratis en línea.
+### [Modelos Estructurales Marginales](https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/): Capítulo sobre MSM en el libro de Hernán y Robins

@@ -1,14 +1,16 @@
 ---
-title: "Propensity Score Diagnostics"
-author: "Lucy D'Agostino McGowan"
-institute: "Wake Forest University"
-format: "kakashi-revealjs"
-knitr:
-  opts_chunk: 
-    eval: false
+title: "Diagnóstico de puntuaciones de propensión"
+author: "Miguel Angel Luque Fernandez"
+institute: "Departamento de Estadística e Investigación Operativa, UGR"
+format: kakashi-revealjs
 ---
 
+## {background-color="#23373B" .center .large}
+
+### Diagnóstico de nuestros pesos
+
 ```{r}
+#| label: setup
 #| include: false
 options(
   tibble.max_extra_cols = 6, 
@@ -16,249 +18,137 @@ options(
 )
 ```
 
-## Checking balance {background-color="#23373B"}
+## {background-color="#23373B" .center}
 
-* Love plots (Standardized Mean Difference)
-* ECDF plots
+### Después de calcular nuestros pesos, es importante diagnosticarlos para asegurarnos de que nuestro modelo IPW sea válido.
 
-## Standardized Mean Difference (SMD) {background-color="#23373B"}
+## {.tiny}
 
-$$\LARGE d = \frac{\bar{x}_{treatment}-\bar{x}_{control}}{\sqrt{\frac{s^2_{treatment}+s^2_{control}}{2}}}$$
-
-## SMD in R ![](img/hex/halfmoon.png){.absolute top=0 right=0 width=140}
-
-<br />
-
-Calculate standardized mean differences
+### `r countdown::countdown(minutos = 2)`
 
 ```{r}
-#| message: false
-#| warning: false
-#| code-line-numbers: "|4|6|7|8|9"
-library(halfmoon)
-library(tidyverse)
-
-smds <- tidy_smd(
-  df,
-  .vars = c(confounder_1, confounder_2, ...),
-  .group = exposure,
-  .wts = wts # optional,
-  make_dummy_vars = TRUE # optional
-)
-```
-
-## Calculating SMDs 
-
-```{r}
-#| message: false
-#| warning: false
 #| echo: false
-#| eval: true
-library(halfmoon)
-library(tidyverse)
-library(broom)
-library(causaldata)
-library(propensity)
-
-propensity_model <- glm(
-  qsmk ~ sex + 
-    race + age + I(age^2) + education + 
-    smokeintensity + I(smokeintensity^2) + 
-    smokeyrs + I(smokeyrs^2) + exercise + active + 
-    wt71 + I(wt71^2), 
-  family = binomial(), 
-  data = nhefs_complete
-)
-
-nhefs_complete_wts <- propensity_model |>
-  augment(type.predict = "response", data = nhefs_complete) |>
-  mutate(w_ate = wt_ate(.fitted, qsmk))
-```
-
-
-```{r}
-#| output-location: slide
-#| eval: true
+#| fig.height: 5.5
 vars <- c(
-  "sex", "race", "age", "education",
-  "smokeintensity", "smokeyrs", 
-  "exercise", "active", "wt71"
+  "sexo", "raza", "edad", "educación", 
+  "intensidad\nfumador", "años\nfumando", 
+  "ejercicio", "actividad\ndiaria", "peso\nbaseline"
 )
 
-smds <- tidy_smd(
-  nhefs_complete_wts,
-  .vars = all_of(vars),
-  .group = qsmk,
-  .wts = w_ate,
-  make_dummy_vars = TRUE
+plot_df <- tidy_smd(
+    nhefs_complete_uc,
+    all_of(vars),
+    qsmk,
+    wts
 )
 
-smds
-```
-
----
-
-## Plotting SMDs ![](img/hex/halfmoon.png){.absolute top=0 right=0 width=140}
-
-<br />
-
-Plot them! (in a Love plot!)
-
-```{r}
-#| code-line-numbers: "|2|3-8|10"
 ggplot(
-  data = smds,
-  aes(
-    x = abs(smd), 
-    y = variable, 
-    group = method, 
-    color = method
-  )
-) +  
-  geom_love()
-```
-
-## Love plot
-
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-smds |> 
-  arrange(method, abs(smd)) |>
-  mutate(variable = fct_inorder(variable)) |> 
-ggplot(
-  mapping = aes(x = abs(smd), y = variable, group = method, color = method)
+    data = plot_df |> filter(method == "observed"),
+    aes(x = abs(smd), y = variable, group = method, color = method, fill = method)
 ) +
-  geom_line(orientation = "y") +
-  geom_point() + 
-  geom_vline(xintercept = 0.1, color = "black", size = 0.1)
+  geom_line(orientation = "y", size = 1) +
+  geom_point(size = 4, color = "white", shape = 21) + 
+  geom_vline(xintercept = 0.1, color = "black", linewidth = 0.3) +
+  theme_minimal(base_size = 20) +
+  theme(axis.title.y = element_blank()) +
+  xlim(0, .3)
 ```
 
-## Your turn 1
+## Estos se ven bastante bien! Algunas variables son mejores que otras, pero el pesaje parece haber hecho un mejor trabajo eliminando estas diferencias que un análisis sin ajustar.
 
-`r countdown::countdown(minutes = 6)`
+## {background-color="#23373B" .center}
 
-### Create a Love Plot for the propensity score weighting you created in the previous exercise
-
-## ECDF
-
-For continuous variables, it can be helpful to look at the _whole_ distribution pre and post-weighting rather than a single summary measure
-
-## ECDF
+### ¿Cómo hacen los pesos la muestra?
 
 ```{r}
 #| echo: false
-#| message: false
-#| warning: false
-#| eval: true
-ggplot(nhefs_complete_wts, aes(x = wt71, color = factor(qsmk))) +
-  geom_ecdf() +
-  scale_color_manual("Quit smoking", values = c("#5154B8", "#5DB854"),
-                     labels = c("Yes", "No")) + 
-  xlab("Weight in Kg in 1971") + 
-  ylab("Proportion <= x") 
+nhefs_complete_uc |> 
+  mutate(qsmk = factor(qsmk)) |> 
+  ggplot(aes(.fitted)) +
+  geom_mirror_histogram(
+    aes(fill = qsmk),
+    bins = 50
+  ) +
+  geom_mirror_histogram(
+    aes(fill = qsmk, weight = wts),
+    bins = 50,
+    alpha = .5
+  ) +
+  scale_y_continuous(labels = abs) +
+  labs(x = "puntuación de propensión") + 
+  theme_minimal(base_size = 20)
 ```
 
-## Unweighted ECDF
+## Ambos grupos están siendo *sobre-pesados* de modo que sus distribuciones de puntuaciones de propensión sean mucho más similares.
+
+## {.small}
+
+### **¿Qué más podemos diagnosticar?**
+
+## Balanceo de covariables
+
+Podemos verificar el balanceo de cada covariable mediante SMD (diferencia estándar media). Los SMD cercanos a 0 indican buen balanceo.
+
+## Recorte de pesos (weight trimming)
+
+Si algunos pesos son extremadamente altos, podríamos considerar recortarlos (trimming) para mejorar la estabilidad del modelo.
+
+## Superposición (overlap)
+
+Verificar que haya suficiente superposición entre los grupos de tratamiento y control en la distribución de las puntuaciones de propensión.
+
+## {background-color="#23373B" .center}
+
+### **Diagnóstico avanzado**
+
+## Ponderación de probabilidad inversa estabilizada
+
+Los pesos IPW estabilizados se calculan como:
+
+$$w_{stab} = \frac{P(T=t)}{e(X)^t \cdot (1-e(X))^{(1-t)}}$$
+
+donde $e(X)$ es la puntuación de propensión estimada.
+
+## Pesos estabilizados
 
 ```{r}
-#| code-line-numbers: "|1|2"
-#| eval: true
-#| output-location: slide
-ggplot(nhefs_complete_wts, aes(x = wt71, color = factor(qsmk))) + 
-  geom_ecdf() +
-  scale_color_manual(
-    "Quit smoking", 
-    values = c("#5154B8", "#5DB854"),
-    labels = c("Yes", "No")
-  ) + 
-  xlab("Weight in Kg in 1971") + 
-  ylab("Proportion <= x") 
-```
-
-
-## Weighted  ECDF 
-
-```{r}
-#| eval: true
-#| code-line-numbers: "|2"
-#| output-location: slide
-ggplot(nhefs_complete_wts, aes(x = wt71, color = factor(qsmk))) +
-  geom_ecdf(aes(weights = w_ate)) +
-  scale_color_manual(
-    "Quit smoking", 
-    values = c("#5154B8", "#5DB854"),
-    labels = c("Yes", "No")
-  ) + 
-  xlab("Weight in Kg in 1971") + 
-  ylab("Proportion <= x (Weighted)") 
-```
-
-## *Your turn 2*
-
-`r countdown::countdown(minutes = 6)`
-
-### Create an unweighted ECDF examining the `park_temperature_high` confounder by whether or not the day had Extra Magic Hours.
-### Create a weighted ECDF examining the `park_temperature_high` confounder
-
-
-## {background-color="#23373B" .center .huge}
-
-### *Bonus!* Weighted Tables in R 
-
-
-## 1. Create a "design object" to incorporate the weights {.gtsummary}
-
-
-```{r}
-#| message: false
-#| warning: false
-library(survey)
-
-svy_des <- svydesign(
-  ids = ~ 1,
-  data = df,
-  weights = ~ wts
-)
-```
-
-## 2. Pass to `gtsummary::tbl_svysummary()` {.gtsummary}
-
-```{r}
-#| message: false
-#| warning: false
-library(gtsummary)
-tbl_svysummary(svy_des, by = x) |>
-  add_difference(everything() ~ "smd")
-# modify_column_hide(ci) to hide CI column
-```
-
-## {.gtsummary .tiny}
-
-```{r}
-#| message: false
-#| warning: false
-#| eval: true
 #| echo: false
-library(survey)
-library(gtsummary)
+library(propensity)
+nhefs_complete_uc <- nhefs_complete_uc |>
+  mutate(
+    ps = .fitted,
+    wts_stabilized = wt_ate(.fitted, qsmk, exposure_type = "binary", stabilizer = "marginal")
+  )
 
-svy_des <- svydesign(
-  ids = ~ 1,
-  data = nhefs_complete_wts |> select(wt71, race, age, sex, smokeintensity, smokeyrs, exercise, active, w_ate, qsmk),
-  weights = ~ w_ate
-)
-theme_gtsummary_compact()
-
-tbl_svysummary(svy_des, by = qsmk, include = -w_ate) |>
-  add_difference(everything() ~ "smd") |>
-  modify_column_hide(ci)
+nhefs_complete_uc |>
+  select(qsmk, .fitted, wts, wts_stabilized) |>
+  head(10)
 ```
 
+## Comparación de pesos
 
-## {background-color="#23373B" .center .huge}
+```{r}
+#| echo: false
+ggplot(nhefs_complete_uc, aes(x = wts, fill = factor(qsmk))) +
+  geom_histogram(color = "white", bins = 50, alpha = .7) +
+  scale_x_log10() +
+  facet_wrap(~ factor(qsmk)) +
+  theme_minimal(base_size = 20) +
+  labs(x = "Peso IPW", fill = "Grupo")
+```
 
-### *Bonus Your Turn*: Weighted Tables
+## {background-color="#23373B" .center}
 
+### **Si los diagnósticos no son satisfactorios...**
+
+## ¿Qué hacer si los pesos son inestables?
+
+1. Considerar recorte de pesos (trimming) en percentiles extremos
+2. Usar pesos estabilizados
+3. Reconsiderar el modelo de propensión (añadir/quitar variables)
+4. Usar métodos alternativos como emparejamiento (matching) o agregación de puntuaciones
+
+## Recursos: diagnóstico de puntuaciones de propensión {background-color="#23373B"}
+### [Vignette del paquete PSW](https://github.com/ci3lab/PSW)
+### [Técnicas de recorte de pesos](https://cran.r-project.org/web/packages/WeightTrimming/WeightTrimming.pdf)
+### [Evaluación de la superposición](https://journals.sagepub.com/doi/abs/10.1177/0040172410381428)

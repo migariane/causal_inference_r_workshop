@@ -1,5 +1,5 @@
 ---
-title: "Outcome Model"
+title: "Modelo de Resultado"
 format: html
 ---
 
@@ -16,11 +16,11 @@ seven_dwarfs <- seven_dwarfs_train_2018 |>
   filter(wait_hour == 9)
 ```
 
-We are interested in examining the relationship between whether there were "Extra Magic Hours" in the morning (the **exposure**) and the average wait time for the Seven Dwarfs Mine Train the same day between 9am and 10am (the **outcome**).
+Estamos interesados en examinar la relación entre si hubo "Horas Mágicas Extra" por la mañana (la **exposición**) y el tiempo de espera promedio para el Seven Dwarfs Mine Train el mismo día entre las 9am y las 10am (el **resultado**).
 
-## Your turn
+## Tu turno
 
-Create a function called `ipw_fit` that fits the propensity score model and incorporates the ATE weights (as calculated in the previous exercises), then uses the weights in a weighted outcome model.
+Crea una función llamada `ipw_fit` que ajuste el modelo de puntuación de propensión del Ejercicio 03, incorpore los pesos ATE calculados en el Ejercicio 04, y ajuste un modelo de resultado ponderado.
 
 ```{r}
 fit_ipw <- function(split, ...) { 
@@ -36,7 +36,7 @@ fit_ipw <- function(split, ...) {
 }
 ```
 
-Bootstrap this result 1000 times.
+Haz bootstrap de este resultado 1000 veces.
 
 ```{r}
 set.seed(1234)
@@ -45,7 +45,7 @@ ipw_results <- ____(___, 1000, apparent = TRUE) |>
   mutate(boot_fits = map(splits, _____)) 
 ```
 
-Check out the distribution of estimates (**no need to change this code**)
+Revisa la distribución de los estimados (**no necesitas cambiar este código**)
 
 ```{r}
 ipw_results |>
@@ -63,7 +63,7 @@ ipw_results |>
   theme_minimal()
 ```
 
-Calculate the confidence interval
+Calcula el intervalo de confianza
 
 ```{r}
 boot_estimate <- ____(____, ____) |>
@@ -73,4 +73,4 @@ boot_estimate
 ```
 
 
-Stretch goal: Do the same for a model using matching.
+Objetivo adicional: Haz lo mismo para un modelo usando emparejamiento.

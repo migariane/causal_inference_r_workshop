@@ -1,5 +1,5 @@
 ---
-title: "Propensity Score Diagnostics"
+title: "Diagnóstico de Puntuaciones de Propensión"
 format: html
 ---
 
@@ -13,9 +13,9 @@ library(halfmoon)
 library(propensity)
 ```
 
-We are interested in examining the relationship between whether there were "Extra Magic Hours" in the morning (the **exposure**) and the average wait time for the Seven Dwarfs Mine Train the same day between 9am and 10am (the **outcome**).
+Estamos interesados en examinar la relación entre si hubo "Horas Mágicas Extra" por la mañana (la **exposición**) y el tiempo de espera promedio para el Seven Dwarfs Mine Train el mismo día entre las 9am y las 10am (el **resultado**).
 
-Below is the propensity score model and weights you created in the previous exercise.
+A continuación se muestra el modelo de puntuación de propensión y los pesos que creaste en el ejercicio anterior.
 
 ```{r}
 seven_dwarfs <- seven_dwarfs_train_2018 |>
@@ -32,9 +32,9 @@ seven_dwarfs_ps <- propensity_model |>
   mutate(w_ate = wt_ate(.fitted, park_extra_magic_morning))
 ```
 
-## Your Turn 1
+## Tu Turno 1
 
-Calculate the standardized mean differences with and without weights
+Calcula las diferencias medias estándar con y sin pesos
 
 ```{r}
 smds <- seven_dwarfs_ps |>
@@ -46,7 +46,7 @@ smds <- seven_dwarfs_ps |>
 )
 ```
 
-Create the Love Plot using ggplot and halfmoon
+Crea el Love Plot usando ggplot y halfmoon
 
 ```{r}
 ggplot(
@@ -56,45 +56,45 @@ ggplot(
   geom_love()
 ```
 
-Stretch goal: Create a Love Plot using `make_dummy_vars = TRUE` and sorted by `abs(smd)` for the SMD values for the rows represnting the observed data.
+Objetivo adicional: Crea un Love Plot usando `make_dummy_vars = TRUE` y ordenado por `abs(smd)` para los valores de SMD de las filas que representan los datos observados.
 
-## Your Turn 2
+## Tu Turno 2
 
-Create an unweighted ECDF for `park_temperature_high` by whether or not the day had Extra Magic Hours.
+Crea un ECDF no ponderado para `park_temperature_high` por si el día tuvo o no Horas Mágicas Extra.
 
 ```{r}
 ggplot(seven_dwarfs_ps, aes(x = ____, group = ____, color = factor(____))) +
   ____() +
   scale_color_manual(
-    "Extra Magic Hours", 
+    "Horas Mágicas Extra", 
     values = c("#5154B8", "#5DB854"),
-    labels = c("Yes", "No")
+    labels = c("Sí", "No")
   ) + 
   xlab(____) + 
-  ylab("Proportion <= x") 
+  ylab("Proporción <= x") 
 ```
 
-Create an weighted ECDF for `park_temperature_high` by whether or not the day had Extra Magic Hours.
+Crea un ECDF ponderado para `park_temperature_high` por si el día tuvo o no Horas Mágicas Extra.
 
 ```{r}
 ggplot(seven_dwarfs_ps, aes(x = ____, color = factor(____))) +
   ____(aes(weights = ____)) + 
   scale_color_manual(
-    "Extra Magic Hours",
+    "Horas Mágicas Extra",
     values = c("#5154B8", "#5DB854"),
-    labels = c("Yes", "No")
+    labels = c("Sí", "No")
   ) +
-  xlab("Historic Temperature") +
-  ylab("Proportion <= x (Weighted)")
+  xlab("Temperatura Histórica") +
+  ylab("Proporción <= x (Ponderado)")
 ```
 
-## Bonus Your Turn: Weighted Tables
+## Bonus Tu Turno: Tablas ponderadas
 
-Create a weighted table for the seven dwarfs dataset given your weights
+Crea una tabla ponderada para el conjunto de datos de los siete enanitos dada tus pesos
 
-1. Create a survey design object using `svydesign()` that specifies the weights as `w_ate`
-2. Use `tbl_svysummary()` by `park_extra_magic_morning` to specify a weighted table
-3. Use `add_difference()` to add `"smd"` differences for every variable
+1. Crea un objeto de diseño de encuesta usando `svydesign()` que especifica los pesos como `w_ate`
+2. Usa `tbl_svysummary()` por `park_extra_magic_morning` para especificar una tabla ponderada
+3. Usa `add_difference()` para añadir diferencias de "smd" para cada variable
 
 
 ```{r}
@@ -113,5 +113,3 @@ ______(
   ) |>
   add_difference(everything() ~ "____") 
 ```
-
-

@@ -1,5 +1,5 @@
 ---
-title: "Causal Inference with `group_by()` and `summarize()`"
+title: "Inferencia Causal con `group_by()` y `summarize()`"
 format: html
 ---
 
@@ -9,9 +9,9 @@ library(tidyverse)
 set.seed(1)
 ```
 
-## Your Turn 1
+## Tu Turno 1
 
-Run this code to generate the simulated data set
+Ejecuta este código para generar el conjunto de datos simulado
 
 ```{r}
 n <- 1000 
@@ -26,8 +26,8 @@ sim <- tibble(
 )
 ```
 
-1. Group the dataset by `confounder` and `exposure`
-2. Calculate the mean of the `outcome` for the groups
+1. Agrupa el dataset por `confounder` y `exposure`
+2. Calcula la media del `outcome` para los grupos
 
 ```{r}
 sim |>
@@ -44,9 +44,9 @@ sim |>
   summarise(estimate = mean(estimate)) # note, we would need to weight this if the confounder groups were not equal sized
 ```
 
-## Your Turn 2
+## Tu Turno 2
 
-Run the following code to generate `sim2`
+Ejecuta el siguiente código para generar `sim2`
 
 ```{r}
 n <- 1000
@@ -65,8 +65,8 @@ sim2 <- tibble(
 )
 ```
 
-1. Group the dataset by the confounders and exposure
-2. Calculate the mean of the outcome for the groups
+1. Agrupa el dataset por los confounders y la exposición
+2. Calcula la media del resultado para los grupos
 
 ```{r}
 sim2 |>
@@ -81,9 +81,9 @@ sim2 |>
   summarise(estimate = mean(estimate))  
 ```
 
-## Your Turn 3
+## Tu Turno 3
 
-Run the following code to generate `sim3`
+Ejecuta el siguiente código para generar `sim3`
 
 ```{r}
 n <- 10000 
@@ -95,9 +95,9 @@ sim3 <- tibble(
 )
 ```
 
-1. Use `ntile()` from dplyr to calculate a binned version of `confounder` called `confounder_q`. We'll create a variable with 5 bins.
-2. Group the dataset by the binned variable you just created and exposure
-3. Calculate the mean of the outcome for the groups
+1. Usa `ntile()` de dplyr para calcular una versión binned de `confounder` llamada `confounder_q`. Crearemos una variable con 5 bins.
+2. Agrupa el dataset por la variable binned que acabas de crear y la exposición
+3. Calcula la media del resultado para los grupos
 
 ```{r}
 sim3 |>
@@ -113,8 +113,8 @@ sim3 |>
   summarise(estimate = mean(estimate))  
 ```
 
-# Take aways
+# Lecciones aprendidas
 
-* Sometimes correlation *is* causation!
-* In simple cases, grouping by confounding variables can get us the right answer without a statistical model
-* Propensity scores generalize the idea of summarizing exposure effects to any number of confounders. Although we'll use models for this process, the foundations are the same.
+* A veces la correlación *es* causalidad.
+* En casos simples, agrupar por variables de confusión puede obtener la respuesta correcta sin un modelo estadístico.
+* Las puntuaciones de propensión generalizan la idea de resumir los efectos de exposición a cualquier número de confounders. Aunque usaremos modelos para este proceso, las bases son las mismas.

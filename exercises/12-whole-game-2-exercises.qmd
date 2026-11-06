@@ -1,5 +1,5 @@
 ---
-title: "Whole Game 2: Malaria and Mosquito Nets"
+title: "Whole Game 2: Malaria y Mosquiteros"
 format: html
 ---
 
@@ -14,47 +14,47 @@ library(propensity)
 library(halfmoon)
 ```
 
-## Whole Game 2: Malaria and Mosquito Nets
+## Whole Game 2: Malaria y Mosquiteros
 
-In this exercise, we'll attempt to answer a causal question: does mosquito bed net use reduce malaria risk? 
+En este ejercicio, intentaremos responder a una pregunta causal: ¿el uso de mosquiteros reduce el riesgo de malaria?
 
-To answer this question, we'll use the causal inference methods we learned in this workshop. You may use any technique you prefer. If you have time, try more than one technique and compare the results. Remember the broad strokes we discussed today: 
+Para responder a esta pregunta, usaremos los métodos de inferencia causal que aprendimos en este taller. Puedes usar cualquier técnica que prefieras. Si tienes tiempo, intenta más de una técnica y compara los resultados. Recuerda las líneas generales que discutimos hoy:
 
-1. Specify causal question (we just did this!)
-2. Draw assumptions (via a causal diagram, which we'll do below)
-3. Model assumptions (e.g. with a propensity score)
-4. Analyze propensities (diagnostics)
-5. Estimate causal effects 
-6. Conduct a sensitivity analysis
+1. Especificar pregunta causal (¡ya lo hicimos!)
+2. Dibujar suposiciones (vía un diagrama causal, que haremos abajo)
+3. Modelar suposiciones (ej. con una puntuación de propensión)
+4. Analizar propensiones (diagnósticos)
+5. Estimar efectos causales
+6. Realizar un análisis de sensibilidad
 
-We'll use simulated data, `net_data`, from the {causalworkshop} package, which includes ten variables: 
+Usaremos datos simulados, `net_data`, del paquete {causalworkshop}, que incluye diez variables:
 `id`
-:    an ID variable
-`net` and `net_num`
-:    a binary variable indicating if the participant used a net (1) or didn't use a net (0)
+: una variable ID
+`net` y `net_num`
+: una variable binaria que indica si el participante usó una red (1) o no usó una red (0)
 `malaria_risk`
-:    a risk of malaria scale ranging from 0-100
+: una escala de riesgo de malaria que va de 0-100
 `income`
-:    weekly income, measured in dollars
+: ingreso semanal, medido en dólares
 `health`
-:    a health score scale ranging from 0–100
+: una puntuación de salud de escala 0–100
 `household`
-:    number of people living in the household
+: número de personas que viven en el hogar
 `eligible`
-:    a binary variable indicating if the household is eligible for the free net program.
+: una variable binaria que indica si el hogar es elegible para el programa de mosquitero gratuito.
 `temperature`
-:    the average temperature at night, in Celsius
+: la temperatura promedio por la noche, en Celsius
 `resistance`
-:    Insecticide resistance of local mosquitoes. This is measured on a scale of 0–100, with higher values indicating higher resistance.
+: Resistencia al insecticida de los mosquitos locales. Se mide en una escala de 0–100, con valores más altos indicando mayor resistencia.
 
-Our thanks to Andrew Heiss for providing these data!
+Nuestro agradecimiento a Andrew Heiss por proporcionar estos datos.
 
 ```{r}
 library(causalworkshop)
 net_data
 ```
 
-Here's the DAG we are proposing. Make sure you confirm what the adjustment set is. 
+Aquí está el DAG que estamos proponiendo. Asegúrate de confirmar cuál es el conjunto de ajuste.
 
 ```{r}
 mosquito_dag <- dagify(
@@ -87,14 +87,14 @@ mosquito_dag <- dagify(
     )
   ),
   labels = c(
-    malaria_risk = "Risk of malaria",
-    net = "Mosquito net",
-    income = "Income",
-    health = "Health",
-    temperature = "Nighttime temperatures",
-    resistance = "Insecticide resistance",
-    eligible = "Eligible for program",
-    household = "Number in the household"
+    malaria_risk = "Riesgo de malaria",
+    net = "Mosquitero",
+    income = "Ingreso",
+    health = "Salud",
+    temperature = "Temperaturas nocturnas",
+    resistance = "Resistencia al insecticida",
+    eligible = "Elegible para el programa",
+    household = "Número en el hogar"
   )
 )
 
@@ -118,17 +118,15 @@ mosquito_dag |>
   ) +
   theme_dag(base_size = 14) +
   theme(legend.position = "none") +
-  labs(caption = "Thanks to Andrew Heiss for the data!") +
+  labs(caption = "Gracias a Andrew Heiss por los datos!") +
   coord_cartesian(clip = "off") +
   ggokabeito::scale_color_okabe_ito(na.value = "grey90")
 ```
 
-# Your Turn
+# Tu Turno
 
-Now, conduct the causal analysis as you see fit! Feel free to work in groups and to ask us questions.
+¡Ahora, realiza el análisis causal como mejor te parezca! No dudes en trabajar en grupos y hacernos preguntas.
 
 ```{r}
 
 ```
-
-

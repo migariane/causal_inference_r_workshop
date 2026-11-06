@@ -1,5 +1,5 @@
 ---
-title: "Causal inference is not just a statistics problem"
+title: "La inferencia causal no es solo un problema de estadística"
 format: html
 ---
 
@@ -9,46 +9,45 @@ library(tidyverse)
 library(quartets)
 ```
 
-## Your turn 1
+## Tu turno 1
 
-For each of the following 4 datasets, create a scatterplot looking at the relationship between `exposure` and `outcome`: 
+Para cada uno de los siguientes 4 datasets, crea un scatterplot mirando la relación entre `exposición` y `resultado`: 
 
 * `causal_collider`
 * `causal_confounding`
 * `causal_mediator`
 * `causal_m_bias`
 
-(Alternatively, you can work with `causal_quartet`, which has all four datasets stacked on top of one another.)
+(Alternativamente, puedes trabajar con `causal_quartet`, que tiene los cuatro datasets apilados uno sobre otro.)
 
 ```{r}
 
 ```
 
-For each of the above 4 datasets, look at the correlation between `exposure` and `covariate`
+Para cada uno de los 4 datasets anteriores, mira la correlación entre `exposición` y `covariable`
 
 
 ```{r}
 
 ```
 
-For each of the above 4 datasets, fit a linear model to examine the relationship between the `exposure` and the `outcome`
+Para cada uno de los 4 datasets anteriores, ajusta un modelo lineal para examinar la relación entre la `exposición` y el `resultado`
 
 ```{r}
 
 ```
 
-## Your turn 2
+## Tu turno 2
 
-For each of the following 4 datasets, fit a linear model examining the relationship between `outcome_followup` and `exposure_baseline` adjusting for `covariate_baseline`: 
+Para cada uno de los siguientes 4 datasets, ajusta un modelo lineal examinando la relación entre `resultado_seguimiento` y `exposición_baseline` ajustando por `covariable_baseline`: 
 
 * `causal_collider_time`
 * `causal_confounding_time`
 * `causal_mediator_time`
 * `causal_m_bias_time`
 
-(Alternatively, you can work with `causal_quartet_time`, which has all four datasets stacked on top of one another.)
+(Alternativamente, puedes trabajar con `causal_quartet_time`, que tiene los cuatro datasets apilados uno sobre otro.)
 
 ```{r}
 
 ```
-

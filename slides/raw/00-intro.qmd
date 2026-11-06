@@ -1,6 +1,8 @@
 ---
-title: "Causal Inference in R: Introduction"
+title: "Inferencia Causal en R: Introducción"
 format: "kakashi-revealjs"
+author: "Miguel Angel Luque Fernandez"
+institute: "Departamento de Estadística e Investigación Operativa, UGR"
 ---
 
 ## `> who_are_we(c("lucy", "malcolm", "travis"))`
@@ -23,9 +25,10 @@ img {
 }
 ```
 
-:::: {.columns}
+::: {.columns}
 
 ::: {.column width="33.3%"}
+
 <br />
 <br />
 
@@ -39,6 +42,7 @@ img {
 :::
 
 ::: {.column width="33.3%"}
+
 <br />
 <br />
 
@@ -50,11 +54,12 @@ img {
 :::
 
 
+
 ::: {.column width="33.3%"}
+
 <br />
 <br />
 <img src="img/tg.jpg" class="rounded-circle" />
-
 
 
 ::: {.small}
@@ -65,44 +70,46 @@ img {
 :::
 :::
 
-::::
+:::
 
 
-## The three practices of analysis {background-color="#23373B"}
 
-1. Describe
-2. Predict
-3. Explain
+## Las tres prácticas del análisis {background-color="#23373B"}
 
-## {background-color="#23373B" .center}
-### Normal regression estimates associations. But we want *counterfactual, causal* estimates: 
-<br />
-
-### What would happen if *everyone* in the study were exposed to x vs if *no one* was exposed.
-
+1. Describir
+2. Predecir
+3. Explicar
 
 ## {background-color="#23373B" .center}
-### For causal inference, we need to make sometimes unverifiable assumptions. 
+### La regresión normal estima asociaciones. Pero queremos *contra-factuales, estimaciones causales*:
 
 <br />
 
-### Today, we'll focus on the assumption of *no confounding*.
+### ¿Qué pasaría si *todos* en el estudio estuvieran expuestos a x vs si *nadie* estuviera expuesto.
 
-## Tools for causal inference {background-color="#23373B"}
 
-- Causal diagrams
-- Propensity score weighting
-- Propensity score matching
-- G-methods & friends
+## {background-color="#23373B" .center}
+### Para la inferencia causal, a veces es necesario hacer suposiciones no verificables.
 
-## Other tools for causal inference {background-color="#23373B"}
+<br />
 
-- Randomized trials
-- Instrumental variables & friends
-- TMLE and other ML for causal inference
+### Hoy nos centraremos en la suposición de *sin confounding*.
 
-## Resources {background-color="#23373B"}
-### [Causal Inference in R](https://www.r-causal.org/): Our book! Free online.
-### [Causal Inference](https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/): Comprehensive text on causal inference. Free online.
-### [The Book of Why](http://bayes.cs.ucla.edu/WHY/): Detailed, friendly intro to DAGs and causal inference. 
-### [Mastering 'Metrics](http://www.masteringmetrics.com/): Friendly introduction to IV-based methods
+## Herramientas para la inferencia causal {background-color="#23373B"}
+
+- Diagramas causales
+- Ponderación por puntuación de propensión
+- Emparejamiento por puntuación de propensión
+- G-methods y amigos
+
+## Otras herramientas para la inferencia causal {background-color="#23373B"}
+
+- Ensayos aleatorizados
+- Variables instrumentales y amigos
+- TMLE y otros ML para inferencia causal
+
+## Recursos {background-color="#23373B"}
+### [Inferencia Causal en R](https://www.r-causal.org/): ¡Nuestro libro! En línea y gratis.
+### [Inferencia Causal](https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/): Texto completo sobre inferencia causal. Gratis en línea.
+### [El Libro de Why](http://bayes.cs.ucla.edu/WHY/): Introducción amigable detallada sobre DAGs e inferencia causal.
+### [Mastering 'Metrics](http://www.masteringmetrics.com/): Introducción amistosa a métodos basados en IV

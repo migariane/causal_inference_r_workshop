@@ -1,13 +1,13 @@
 ---
-title: "When Standard Methods Succeed"
-author: "Lucy D'Agostino McGowan"
-institute: "Wake Forest University"
+title: "Cuando los métodos estándar funcionan"
+author: "Miguel Angel Luque Fernandez"
+institute: "Departamento de Estadística e Investigación Operativa, UGR"
 format: kakashi-revealjs
 ---
 
 ## {background-color="#23373B" .center .large}
 
-### when correlation *is* causation
+### Cuando la correlación *es* causalidad
 
 ```{r}
 #| label: setup
@@ -20,84 +20,45 @@ options(
 
 ## {background-color="#23373B" .center}
 
-### When you have no confounders and there is a linear relationship between the exposure and the outcome, that *correlation is a causal relationship*
+### Cuando no tienes confounders y existe una relación lineal entre la exposición y el resultado, *la correlación es una relación causal*
 
 ### `r emo::ji("wow")`
 
 ## {background-color="#23373B" .center}
 
-### When you have no confounders and there is a linear relationship between the *exposure* and the outcome, that correlation is a causal relationship
+### Cuando no tienes confounders y existe una relación lineal entre la *exposición* y el resultado, que la correlación es una relación causal
 
 ### `r emo::ji("wow")`
 
 ## {background-color="#23373B" .center}
 
-### When you have no confounders and there is a linear relationship between the exposure and the *outcome*, that correlation is a causal relationship
+### Cuando no tienes *confounders* y existe una relación lineal entre la exposición y el resultado, que la correlación es una relación causal
 
 ### `r emo::ji("wow")`
 
 ## {background-color="#23373B" .center}
 
-### When you have no *confounders* and there is a linear relationship between the exposure and the outcome, that correlation is a causal relationship
-### `r emo::ji("wow")`
+### Incluso en estos casos, los métodos que aprenderás aquí pueden ayudar!
 
-## {background-color="#23373B" .center}
+## {background-color="#23373B"}
 
-### randomized controlled trials
-### A/B testing
+1. Ajustar por covariables baseline puede hacer que un estimado *sea más eficiente*
+1. La ponderación por puntuación de propensión es *más eficiente* que el ajuste directo
+1. A veces nos sentimos *más cómodos con la forma funcional de la puntuación de propensión* (predecir exposición) que el modelo de resultado
 
-## Even in these cases, using the methods you will learn here can help! {background-color="#23373B"} 
+## Ejemplo
 
-1. Adjusting for baseline covariates can make an estimate *more efficient*
-1. Propensity score weighting is *more efficient* than direct adjustment
-1. Sometimes we are *more comfortable with the functional form of the propensity score* (predicting exposure) than the outcome model
-
-
-## Example
-
-* **simulated** data (100 observations)  
-* Treatment is **randomly** assigned 
-* There are **two baseline covariates**: `age` and `weight`
-
-## Example
-
-```{r}
-#| echo: false
-#| message: false
-#| warning: false
-library(tidyverse)
-library(gtsummary)
-set.seed(10)
-n <- 100
-d <- tibble(
-  age = rnorm(n, 55, 20),
-  weight = rnorm(n),
-  treatment = rbinom(n, 1, 0.5),
-  y = treatment + 0.2 * age + 0.2 * weight + rnorm(n)
-)
-library(ggdag)
-
-x <- data.frame(
-  name = c("y", "trt", "age", "wt"), 
-  time = c(3, 2, 1, 1)
-)
-dagify(
-  y ~ trt + age + wt,
-  coords = time_ordered_coords(x)
-) |> 
-  ggdag() +
-  theme_dag()
-```
-
-* **True average treatment effect**: 1
-
+* **Datos simulados** (100 observaciones)
+* El tratamiento se asigna **aleatoriamente**
+* Hay **dos covariables baseline**: `edad` y `peso`
 
 ## {.tiny}
 
-:::: {.columns}
+::: {.columns}
 
 ::: {.column width="33%" .fragment}
-### Unadjusted model
+
+### Modelo sin ajustar
 
 ```{r}
 #| eval: false
@@ -116,7 +77,8 @@ lm(y ~ treatment, d) |>
 :::
 
 ::: {.column width="33%" .fragment}
-### Adjusted model
+
+### Modelo ajustado
 
 ```{r}
 #| eval: false
@@ -125,14 +87,18 @@ lm(y ~ treatment + weight + age, data = data)
 
 ```{r}
 #| echo: false
-lm(y ~ treatment + weight + age, data = d) |>
+#| message: false
+#| warning: false
+lm(y ~ treatment + weight + age, d) |>
   tbl_regression() |>
   modify_column_unhide(column = std.error)
 ```
+
 :::
 
 ::: {.column width="33%" .fragment}
-### Propensity score adjusted model
+
+### Modelo ajustado por puntuación de propensión
 
 ```{r}
 #| echo: false
@@ -149,30 +115,31 @@ x <- psw(df,
          weight = "ATE", wt = TRUE,
          out.var = "y")
 tibble(
-  Characteristic = "treatment",
+  Característica = "treatment",
   Beta = round(x$est.wt, 1),
   SE = round(x$std.wt, 3),
-  `95% CI` = glue::glue("{round(x$est.wt - 1.96 * x$std.wt, 1)}, {round(x$est.wt + 1.96 * x$std.wt, 1)}"),
-  `p-value` = "<0.001"
+  `IC 95%` = glue::glue("{round(x$est.wt - 1.96 * x$std.wt, 1)}, {round(x$est.wt + 1.96 * x$std.wt, 1)}"),
+  `p-valor` = "<0.001"
 ) |>
   knitr::kable()
 ```
 
 :::
-::::
+:::
 
-## Example
+## Ejemplo
 
-* **simulated** data (10,000 observations)  
-* Treatment is **randomly** assigned 
-* There are **two baseline covariates**: `age` and `weight`
+* **Datos simulados** (10,000 observaciones)
+* El tratamiento se asigna **aleatoriamente**
+* Hay **dos covariables baseline**: `edad` y `peso`
 
 ## {.tiny}
 
-:::: {.columns}
+::: {.columns}
 
 ::: {.column width="33%" .fragment}
-### Unadjusted model
+
+### Modelo sin ajustar
 
 ```{r}
 #| eval: false
@@ -197,11 +164,12 @@ lm(y ~ treatment, d) |>
   tbl_regression() |>
   modify_column_unhide(column = std.error)
 ```
+
 :::
 
-
 ::: {.column width="33%" .fragment}
-### Adjusted model
+
+### Modelo ajustado
 
 ```{r}
 #| eval: false
@@ -210,14 +178,18 @@ lm(y ~ treatment + weight + age, data = data)
 
 ```{r}
 #| echo: false
-lm(y ~ treatment + weight + age, data = d) |>
+#| message: false
+#| warning: false
+lm(y ~ treatment + weight + age, d) |>
   tbl_regression() |>
   modify_column_unhide(column = std.error)
 ```
+
 :::
 
 ::: {.column width="33%" .fragment}
-### Propensity score adjusted model
+
+### Modelo ajustado por puntuación de propensión
 
 ```{r}
 #| echo: false
@@ -234,26 +206,37 @@ x <- psw(df,
          weight = "ATE", wt = TRUE,
          out.var = "y")
 tibble(
-  Characteristic = "treatment",
+  Característica = "treatment",
   Beta = round(x$est.wt, 1),
   SE = round(x$std.wt, 3),
-  `95% CI` = glue::glue("{round(x$est.wt - 1.96 * x$std.wt, 1)}, {round(x$est.wt + 1.96 * x$std.wt, 1)}"),
-  `p-value` = "<0.001"
+  `IC 95%` = glue::glue("{round(x$est.wt - 1.96 * x$std.wt, 1)}, {round(x$est.wt + 1.96 * x$std.wt, 1)}"),
+  `p-valor` = "<0.001"
 ) |>
   knitr::kable()
 ```
 
 :::
-::::
+:::
 
-## Example
+## Ejemplo
 
-* **simulated** data (10,000 observations)  
-* Treatment is **not** randomly assigned 
-* There are **two baseline confounders**: `age` and `weight`
-* The treatment effect is **homogeneous**
+* **Datos simulados** (10,000 observaciones)
+* El tratamiento se asigna **no aleatoriamente**
+* Hay **dos confounders baseline**: `edad` y `peso`
+* El efecto del tratamiento es **homogéneo**
 
-## Example
+## {.tiny}
+
+::: {.columns}
+
+::: {.column width="33%" .fragment}
+
+### Modelo sin ajustar
+
+```{r}
+#| eval: false
+lm(y ~ treatment, data = data)
+```
 
 ```{r}
 #| echo: false
@@ -267,47 +250,16 @@ d <- tibble(
   treatment = rbinom(n, 1, 1 / (1 + exp(-(0.01 * age + 0.1 * weight)))),
   y = treatment + 0.2 * age + 0.2 * weight + rnorm(n)
 )
-
-x <- data.frame(
-  name = c("y", "trt", "age", "wt"), 
-  time = c(3, 2, 1, 1)
-)
-dagify(
-  y ~ trt + age + wt,
-  trt ~ age + wt,
-  coords = time_ordered_coords(x)
-) |> 
-  ggdag() + 
-  theme_dag()
-```
-
-* **True average treatment effect**: 1
-
-## {.tiny}
-
-:::: {.columns}
-
-::: {.column width="33%" .fragment}
-### Unadjusted model
-
-```{r}
-#| eval: false
-lm(y ~ treatment, data = data)
-```
-
-```{r}
-#| echo: false
-#| message: false
-#| warning: false
 lm(y ~ treatment, d) |>
   tbl_regression() |>
   modify_column_unhide(column = std.error)
 ```
+
 :::
 
-
 ::: {.column width="33%" .fragment}
-### Adjusted model
+
+### Modelo ajustado
 
 ```{r}
 #| eval: false
@@ -316,14 +268,18 @@ lm(y ~ treatment + weight + age, data = data)
 
 ```{r}
 #| echo: false
-lm(y ~ treatment + weight + age, data = d) |>
+#| message: false
+#| warning: false
+lm(y ~ treatment + weight + age, d) |>
   tbl_regression() |>
   modify_column_unhide(column = std.error)
 ```
+
 :::
 
 ::: {.column width="33%" .fragment}
-### Propensity score adjusted model
+
+### Modelo ajustado por puntuación de propensión
 
 ```{r}
 #| echo: false
@@ -340,18 +296,18 @@ x <- psw(df,
          weight = "ATE", wt = TRUE,
          out.var = "y")
 tibble(
-  Characteristic = "treatment",
+  Característica = "treatment",
   Beta = round(x$est.wt, 1),
   SE = round(x$std.wt, 3),
-  `95% CI` = glue::glue("{round(x$est.wt - 1.96 * x$std.wt, 1)}, {round(x$est.wt + 1.96 * x$std.wt, 1)}"),
-  `p-value` = "<0.001"
+  `IC 95%` = glue::glue("{round(x$est.wt - 1.96 * x$std.wt, 1)}, {round(x$est.wt + 1.96 * x$std.wt, 1)}"),
+  `p-valor` = "<0.001"
 ) |>
   knitr::kable()
 ```
 
 :::
-::::
+:::
 
 ## {background-color="#23373B" .center}
 
-### *time-varying* confounding
+### *confounding* a tiempo variable

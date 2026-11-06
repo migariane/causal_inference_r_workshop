@@ -1,7 +1,7 @@
 ---
-title: "Causal inference is not just a statistics problem"
-author: "Lucy D'Agostino McGowan"
-institute: "Wake Forest University"
+title: "La inferencia causal no es solo un problema de estadística"
+author: "Miguel Angel Luque Fernandez"
+institute: "Departamento de Estadística e Investigación Operativa, UGR"
 format: kakashi-revealjs
 knitr:
   opts_chunk: 
@@ -22,19 +22,19 @@ library(ggdag)
 library(gt)
 ```
 
-# Causal Inference is not a statistics problem {background-color="#23373B"}
+# La inferencia causal no es un problema de estadística {background-color="#23373B"}
 
-# Causal Inference is not *just* a statistics problem {background-color="#23373B"}
+# La inferencia causal no es *solo* un problema de estadística {background-color="#23373B"}
 
-## *The problem*
+## *El problema*
 
 :::{.large}
-We have measured variables, what should we adjust for?
+Hemos medido variables, ¿qué deberíamos ajustar por?
 :::
 
 . . .
 
-**exposure** | **outcome** | **covariate**
+**exposición** | **resultado** | **covariable**
 ---|---|---
 0.49 | 1.71 | 2.24
 0.07 | 0.68 | 0.92
@@ -44,9 +44,9 @@ We have measured variables, what should we adjust for?
 . | . | .
 0.55 | -1.73 | -2.34
 
-## *What does the data say?*
+## *¿Qué dice los datos?*
 
-:::: columns
+::: columns
 
 ::: column
 ```{r}
@@ -59,44 +59,23 @@ ggplot(causal_confounding, aes(x = exposure, y = outcome)) +
   geom_smooth(method = "lm", formula = "y ~ x")
 ```
 
-**One unit increase in the exposure yields an average increase in the outcome of 1**
+**Un aumento unitario en la exposición produce un aumento promedio en el resultado de 1**
 :::
 
 ::: column
 
 ```{r}
-#| echo: true
 cor(exposure, covariate)
 ```
 
-```{r}
-#| echo: false
-#| eval: true
-cor(causal_confounding$exposure, causal_confounding$covariate) |>
-  round(digits = 2)
-```
-
-**The exposure and measured factor are positively correlated**
+**La exposición y el factor medido están positivamente correlacionados**
 :::
 
-::::
-
-##
-
-:::: columns
-
-::: column
-
-![](img/shake.png)
 :::
 
-::: column
+## *Ajustar o no ajustar? Esa es la pregunta.*
 
-### To adjust or not adjust? That is the question.
-:::
-::::
-
-## *Causal Quartet* 
+## *Cuarteto causal* 
 
 ```{r}
 #| echo: false
@@ -137,7 +116,7 @@ d_coll <- dagify(
 coords <- list(
   x = c(X = 1, Z = 2, Y = 3),
   y = c(X = 1, Z = 1.1, Y = 1)
-)
+) 
 
 d_med <- dagify(
   Z ~ X,
@@ -168,10 +147,10 @@ d_mbias <- dagify(
   as_tibble()
 
 dag_data <- bind_rows(
-  `(1) Collider` = d_coll,
-  `(2) Confounder` = d_conf,
-  `(3) Mediator` = d_med,
-  `(4) M-bias` = d_mbias,
+  `(1) Colizador` = d_coll,
+  `(2) Confundor` = d_conf,
+  `(3) Mediador` = d_med,
+  `(4) Sesgo M` = d_mbias,
   .id = "dag"
 )
 
@@ -196,32 +175,30 @@ dags
 ```
 
 
-## {.center .middle}
+## ![](img/quartets-logo.png)
 
-![](img/quartets-logo.png)
 
-## *Your turn 1* {.small}
+## *Tu turno 1* {.small}
 
-### Load the `quartets` package
-###  For each of the following 4 datasets, create a scatterplot looking at the relationship between `exposure` and `outcome`: `causal_collider`, `causal_confounding`, `causal_mediator`, `causal_m_bias`
-### For each of the above 4 datasets, look at the correlation between `exposure` and `covariate`
-### *Stretch goal*: For each of the above 4 datasets, fit a linear model to examine the relationship between the `exposure` and the `outcome`
+### Carga el paquete `quartets`
+### Para cada uno de los siguientes 4 datasets, crea un scatterplot mirando la relación entre `exposure` y `outcome`: `causal_collider`, `causal_confounding`, `causal_mediator`, `causal_m_bias`
+### Para cada uno de los datasets anteriores, mira la correlación entre `exposure` y `covariate`
+### *Objetivo adicional*: Para cada uno de los datasets anteriores, ajusta un modelo lineal para examinar la relación entre la `exposure` y el `outcome`
 
 `r countdown::countdown(6)`
 
-## *Relationship between exposure and outcome*
+## *Relación entre exposición y resultado*
 
 ```{r}
 #| echo: false
 #| eval: true
-
 ggplot(causal_quartet, aes(x = exposure, y = outcome)) + 
   geom_point() + 
   geom_smooth(method = "lm", formula = "y ~ x") + 
   facet_wrap(~ dataset)
 ```
 
-## *Relationship between exposure and covariate*
+## *Relación entre exposición y covariable*
 
 ```{r}
 #| eval: true
@@ -230,7 +207,7 @@ causal_quartet |>
   summarise(corr = cor(exposure, covariate))
 ```
 
-## *Observed effects* {.large}
+## *Efectos observados* {.large}
 
 ```{r}
 #| echo: false
@@ -243,58 +220,50 @@ causal_quartet |>
     cor = cor(data$exposure, data$covariate)
   ) |>
   select(-data, dataset) |> 
-  ungroup() |> 
   gt() |> 
   gt::cols_label(
-    dataset = "Data generating mechanism",   
-    ate_x = "ATE not adjusting for Z",       
-    ate_xz = "ATE adjusting for Z", 
-    cor = "Correlation of X and Z"
+    dataset = "Mecanismo de generación de datos",   
+    ate_x = "ATE sin ajustar por Z",       
+    ate_xz = "ATE ajustando por Z", 
+    cor = "Correlación de X y Z"
   ) |>
   fmt_number() |> 
-  tab_options(table.font.size = "80%")
+  tab_options(table.font.size = "80%"
+)
 ```
 
 ::: tiny
 D'Agostino McGowan L, Gerke T, Barrett M (2023). 
-Causal inference is not a statistical problem. Preprint arXiv:2304.02683v1.
+La inferencia causal no es un problema estadístico. Preimpreso arXiv:2304.02683v1.
 :::
 
-## The solution
-
-```{r}
-#| echo: false
-#| eval: true
-#| fig-width: 8.5
-dags
-```
-
-## *Correct effects*
+## *Efectos correctos*
 
 ```{r}
 #| echo: false
 #| eval: true
 tribble(
-  ~"Data generating mechanism",	~"Correct causal model",	~"Correct causal effect",
+  ~"Mecanismo de generación de datos",	~"Modelo causal correcto",	~"Efecto causal correcto",
   "(1) Collider",	"Y ~ X",	"1.0",
   "(2) Confounder",	"Y ~ X ; Z",	"0.5",
   "(3) Mediator",
-  "Direct effect: Y ~ X ; Z
-  Total Effect: Y ~ X",
-  "Direct effect: 0.0
-  Total effect: 1.0",
+  "Efecto directo: Y ~ X ; Z
+  Efecto total: Y ~ X",
+  "Efecto directo: 0.0
+  Efecto total: 1.0",
   "(4) M-Bias",	"Y ~ X",	"1.0"
 ) |> 
   gt() |> 
-  tab_options(table.font.size = "100%")
+  tab_options(table.font.size = "100%"
+)
 ```
 
 ::: tiny
 D'Agostino McGowan L, Gerke T, Barrett M (2023). 
-Causal inference is not a statistical problem. Preprint arXiv:2304.02683v1.
+La inferencia causal no es un problema estadístico. Preimpreso arXiv:2304.02683v1.
 :::
 
-## The *partial* solution
+## *La solución parcial*
 
 ::: small
 ```{r}
@@ -302,14 +271,13 @@ Causal inference is not a statistical problem. Preprint arXiv:2304.02683v1.
 #| eval: true
 causal_collider_time
 ```
-
 :::
 
 . . .
 
-*Time-varying data*
+**Datos con tiempo**
 
-## Time-varying DAG
+## DAG a tiempo variable
 
 ```{r}
 #| echo: false
@@ -399,10 +367,10 @@ col_bias
 
 . . .
 
-**True causal effect**: 1
-**Estimated causal effect**: 0.55
+**Efecto causal verdadero**: 1
+**Efecto causal estimado**: 0.55
 
-## Time-varying DAG
+## DAG a tiempo variable
 
 ```{r}
 #| echo: false
@@ -412,18 +380,18 @@ no_col_bias
 
 . . .
 
-**True causal effect**: 1
-**Estimated causal effect**: 1
+**Efecto causal verdadero**: 1
+**Efecto causal estimado**: 1
 
 # `outcome_followup ~ exposure_baseline + covariate_baseline` {.tiny background-color="#23373B"}
 
-## *Your turn 2*
+## *Tu turno 2*
 
-### For each of the following 4 datasets, fit a linear linear model examining the relationship between `outcome_followup` and `exposure_baseline` adjusting for `covariate_baseline`: `causal_collider_time`, `causal_confounding_time`, `causal_mediator_time`, `causal_m_bias_time`
+### Para cada uno de los siguientes 4 datasets, ajusta un modelo lineal lineal examinando la relación entre `outcome_followup` y `exposure_baseline` ajustando por `covariate_baseline`: `causal_collider_time`, `causal_confounding_time`, `causal_mediator_time`, `causal_m_bias_time`
 
 `r countdown::countdown(6)`
 
-## The *partial* solution
+## *La solución parcial*
 
 ```{r}
 #| echo: false
@@ -440,28 +408,26 @@ causal_quartet_time |>
   ungroup() |> 
   gt() |> 
   gt::cols_label(
-    dataset = "Data generating mechanism",   
-    ate_x = "ATE not adjusting for pre-exposure Z",
-    ate_xz = "ATE adjusting for pre-exposure Z", 
-    truth = "Correct causal effect"
+    dataset = "Mecanismo de generación de datos",   
+    ate_x = "ATE sin ajustar para exposición previa Z",
+    ate_xz = "ATE ajustando para exposición previa Z", 
+    truth = "Efecto causal correcto"
   ) |>
   fmt_number() |> 
-  tab_options(table.font.size = "80%")
-```
+  tab_options(table.font.size = "80%"
+)
 
 
 ::: tiny
 D'Agostino McGowan L, Gerke T, Barrett M (2023). 
-Causal inference is not a statistical problem. Preprint arXiv:2304.02683v1.
+La inferencia causal no es un problema estadístico. Preimpreso arXiv:2304.02683v1.
 :::
 
-## *On M-Bias*
+## *Sobre el sesgo M*
 
 ::: small
-* The relationship between Z and the unmeasured confounders needs to be really large (Liu et al 2012)
-* "To obsess about the possibility of [M-bias] generates bad practical advice in all but the most unusual circumstances" (Rubin 2009)
-* There are (almost) no true zeros (Gelman 2011)
-* Asymptotic theory shows that induction of M-bias is quite sensitive to various deviations from the exact M-Structure (Ding and Miratrix 2014)
+* La relación entre Z y los confounders no medidos necesita ser realmente grande (Liu et al 2012)
+* "Obsesionarse con la posibilidad de [M-bias] genera malos consejos prácticos en casi todas las circunstancias inusuales" (Rubin 2009)
+* No existen (casi) ceros verdaderos (Gelman 2011)
+* La teoría asintótica muestra que la inducción de M-bias es bastante sensible a diversas desviaciones de la estructura M exacta (Ding and Miratrix 2014)
 :::
-
-

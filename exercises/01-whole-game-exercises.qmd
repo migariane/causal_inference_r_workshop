@@ -1,5 +1,5 @@
 ---
-title: "Causal Modeling in R: Whole Game"
+title: "Modelado Causal en R: Whole Game"
 format: html
 ---
 
@@ -17,13 +17,13 @@ library(ggokabeito)
 set.seed(1234)
 ```
 
-## Causal Modeling: Whole Game
+## Modelado Causal: Whole Game
 
-In this guided exercise, we'll attempt to answer a causal question: does quitting smoking make you gain weight? Causal modeling has a special place in the history of smoking research: the studies that demonstrated that smoking causes lung cancer were observational. Thanks to other studies, we also know that, if you're already a smoker, quitting smoking reduces your risk of lung cancer. However, some have observed that former smokers tend to gain weight. Is this the result of quitting smoking, or does something else explain this effect? In the book Causal Inference by Hernán and Robins, the authors analyze this question using several causal inference techniques. 
+En este ejercicio guiado, intentaremos responder a una pregunta causal: ¿dejar de fumar hace que engordes? El modelado causal tiene un lugar especial en la historia de la investigación sobre el tabaco: los estudios que demostraron que fumar causa cáncer de pulmón fueron observacionales. Gracias a otros estudios, también sabemos que, si ya eres fumador, dejar de fumar reduce tu riesgo de cáncer de pulmón. Sin embargo, algunos han observado que los exfumadores tienden a ganar peso. ¿Es esto el resultado de dejar de fumar, o algo más explica este efecto? En el libro *Causal Inference* de Hernán y Robins, los autores analizan esta pregunta usando varias técnicas de inferencia causal. 
 
-To answer this question, we'll use causal inference methods to examine the relationship between quitting smoking and gaining weight. First, we'll draw our assumptions with a causal diagram (a directed acyclic graph, or DAG), which will guide our model. Then, we'll use a modeling approach called inverse probability weighting--one of many causal modeling techniques--to estimate the causal effect we're interested in.
+Para responder a esta pregunta, usaremos métodos de inferencia causal para examinar la relación entre dejar de fumar y ganar peso. Primero, dibujaremos nuestras suposiciones con un diagrama causal (un gráfico acíclico dirigido, o DAG), que guiará nuestro modelo. Luego, usaremos un enfoque de modelado llamado ponderación por probabilidad inversa--una de muchas técnicas de modelado causal--para estimar el efecto causal que nos interesa.
 
-We'll use data from NHEFS to try to estimate the causal effect of quitting smoking on weight game. NHEFS is a longitudinal, observational study that has many of the variables we'll need. Take a look at `nhefs_codebook` if you want to know more about the variables in this data set. These data are included in the {causaldata} package. We'll use the `nhefs_complete` data set, but we'll remove people who were lost to follow-up.
+Usaremos datos de NHEFS para tratar de estimar el efecto causal de dejar de fumar en el aumento de peso. NHEFS es un estudio longitudinal observacional que tiene muchas de las variables que necesitaremos. Echa un vistazo a `nhefs_codebook` si quieres saber más sobre las variables en este conjunto de datos. Usaremos el conjunto de datos `nhefs_complete`, pero eliminaremos a las personas que se perdieron el seguimiento.
 
 ```{r}
 nhefs_complete_uc <- nhefs_complete |>
@@ -31,7 +31,7 @@ nhefs_complete_uc <- nhefs_complete |>
 nhefs_complete_uc
 ```
 
-Let's look at the distribution of weight gain between the two groups. 
+Veamos la distribución del aumento de peso entre los dos grupos. 
 
 ```{r}
 nhefs_complete_uc |>
@@ -42,15 +42,15 @@ nhefs_complete_uc |>
   theme_minimal() +
   theme(legend.position = "bottom") + 
   labs(
-    x = "change in weight (kg)",
-    fill = "quit smoking (1 = yes)"
+    x = "cambio en peso (kg)",
+    fill = "dejar de fumar (1 = sí)"
   )
 ```
 
-There's a difference--former smokers do seemed to have gained a bit more weight--but there's also a lot of variation. Let's look at the numeric summaries.
+Hay una diferencia--los exfumadores parecen haber ganado un poco más de peso--, pero también hay mucha variación. Veamos los resúmenes numéricos.
 
 ```{r}
-# ~2.5 kg gained for quit vs. not quit
+# ~2.5 kg ganados al dejar de fumar vs. no fumar
 nhefs_complete_uc |>
   group_by(qsmk) |>
   summarize(
@@ -60,11 +60,11 @@ nhefs_complete_uc |>
   )
 ```
 
-Here, it looks like those who quit smoking gained, on average, 2.5 kg. But is there something else that could explain these results? There are many factors associated with both quitting smoking and gaining weight; could one of those factors explain away the results we're seeing here?
+Aquí, parece que quienes dejaron de fumar ganaron, en promedio, 2.5 kg. ¿Pero hay algo más que podría explicar estos resultados? Hay muchos factores asociados tanto con dejar de fumar como con ganar peso; ¿podría uno de esos factores explicar los resultados que estamos viendo aquí?
 
-To truly answer this question, we need to specify a causal diagram based on domain knowledge. Sadly, for most circumstances, there is no data-driven approach that consistently identify confounders. Only our causal assumptions can help us identify them. Causal diagrams are a visual expression of those assumptions linked to rigorous mathematics that allow us to understand what we need to account for in our model.
+Para responder realmente a esta pregunta, necesitamos especificar un diagrama causal basado en el conocimiento de dominio. Lamentablemente, para la mayoría de las circunstancias, no existe un enfoque basado en datos que identifique consistentemente los confounders. Solo nuestras suposiciones causales pueden ayudarnos a identificarlos. Los diagramas causales son una expresión visual de esas suposiciones vinculadas a matemáticas rigurosas que nos permiten entender qué debemos tener en cuenta en nuestro modelo.
 
-In R, we can visualize and analyze our DAGs with the {ggdag} package. {ggdag} uses {ggplot2} and {ggraph} to visualize diagrams and {dagitty} to analyze them. Let's set up our assumptions. The `dagify()` function takes formulas, much like `lm()` and friends, to express assumptions. We have two basic causal structures: the causes of quitting smoking and the causes of gaining weight. Here, we're assuming that the set of variables here affect both. Additionally, we're adding `qsmk` as a cause of `wt82_71`, which is our causal question; we also identify these as our outcome and exposure. Finally, we'll add some labels so the diagram is easier to understand. The result is a `dagitty` object, and we can transform it to a `tidy_dagitty` data set with `tidy_dagitty()`.
+En R, podemos visualizar y analizar nuestros DAGs con el paquete {ggdag}. {ggdag} usa {ggplot2} y {ggraph} para visualizar diagramas y {dagitty} para analizarlos. Configurémonos nuestras suposiciones. La función `dagify()` toma fórmulas, al igual que `lm()` y amigos, para expresar suposiciones. Tenemos dos estructuras causales básicas: las causas de dejar de fumar y las causas de ganar peso. Aquí, estamos asumiendo que el conjunto de variables aquí afecta ambas. Además, estamos agregando `qsmk` como causa de `wt82_71`, que es nuestra pregunta causal; también identificamos estas como nuestra exposición y resultado. Finalmente, agregaremos algunas etiquetas para que el diagrama sea más fácil de entender. El resultado es un objeto `dagitty`, y podemos transformarlo a un conjunto de datos `tidy_dagitty` con `tidy_dagitty()`.
 
 ```{r}
 # set up DAG
@@ -83,23 +83,23 @@ smk_wt_dag <- dagify(
   # with clearer names
   labels = c(
     # causal question
-    "qsmk" = "quit\nsmoking",
-    "wt82_71" = "change in\nweight",
+    "qsmk" = "dejar\nfumar",
+    "wt82_71" = "cambio en\npeso",
     
     # demographics
-    "age" = "age",
-    "sex" = "sex",
-    "race" = "race",
-    "education" = "education",
+    "age" = "edad",
+    "sex" = "sexo",
+    "race" = "raza",
+    "education" = "educación",
     
     # health
-    "wt71" = "baseline\nweight",
-    "active" = "daily\nactivity\nlevel",
-    "exercise" = "exercise",
+    "wt71" = "peso\nbaseline",
+    "active" = "nivel\ndiario\nde actividad",
+    "exercise" = "ejercicio",
     
     # smoking history
-    "smokeintensity" = "smoking\nintensity",
-    "smokeyrs" = "yrs of\nsmoking"
+    "smokeintensity" = "intensidad\nfumador",
+    "smokeyrs" = "años\nfumando"
   )
 ) |>
   tidy_dagitty()
@@ -107,14 +107,14 @@ smk_wt_dag <- dagify(
 smk_wt_dag
 ```
 
-Let's visualize our assumptions with `ggdag()`. 
+Visualicemos nuestras suposiciones con `ggdag()`. 
 
 ```{r}
 smk_wt_dag |>
   ggdag(text = FALSE, use_labels = "label")
 ```
 
-What do we need to control for to estimate an unbiased effect of quitting smoking on weight gain? In many DAGs, there will be many sets of variables--called adjustment sets--that will give us the right effect (assuming our DAG is correct--a big, unverifiable assumption!). `ggdag_adjustment_set()` can help you visualize them. Here, there's only one adjustment set: we need to control for everything! While we're add it, since a {ggdag} plot is just a {ggplot2} plot, let's clean it up a bit, too.
+¿Qué necesitamos controlar para estimar un efecto sin sesgo de dejar de fumar en el aumento de peso? En muchos DAGs, habrá muchos conjuntos de variables--llamados conjuntos de ajuste--que nos darán el efecto correcto (asumiendo que nuestro DAG es correcto--una suposición grande e incuestionable!). `ggdag_adjustment_set()` puede ayudarte a visualizarlos. Aquí, solo hay un conjunto de ajuste: ¡tenemos que controlar por todo! Mientras lo agregamos, como un {ggdag} es solo un {ggplot2}, ¡limpiemos un poco también!
 
 ```{r}
 smk_wt_dag |>
@@ -124,7 +124,7 @@ smk_wt_dag |>
   scale_fill_okabe_ito(order = c(1, 5))
 ```
 
-Let's fit a model with these variables. Note that we'll fit all continuous variables with squared terms, as well, to allow them a bit of flexibility.
+Ajustemos un modelo con estas variables. Ten en cuenta que ajustaremos todas las variables continuas con términos cuadráticos, también, para permitirles un poco de flexibilidad.
 
 ```{r}
 lm(
@@ -139,11 +139,11 @@ lm(
   filter(term == "qsmk")
 ```
 
-When we adjust for the variables in our DAG, we get an estimate of about 3.5 kg--people who quit smoking gained about this amount of weight. However, we are trying to answer a specific causal question: how much weight would a person gain if the quit smoking vs. if the same person did not quit smoking? Let's use an inverse probability weighting model to try to estimate that effect at the population level (what if *everyone* quit smoking vs what if *no one* quit smoking).
+Cuando ajustamos por las variables en nuestro DAG, obtenemos un estimado de alrededor de 3.5 kg--las personas que dejan de fumar ganaron alrededor de esta cantidad de peso. Sin embargo, estamos intentando responder una pregunta causal específica: ¿cuánto peso ganaría una persona si dejara de fumar vs. si la misma persona no dejara de fumar? Usemos un modelo de ponderación por probabilidad inversa (IPW) para intentar estimar ese efecto a nivel poblacional (¿qué si *todos* dejaran de fumar vs. ¿qué si *nadie* dejara de fumar?).
 
-For a simple IPW model, we have two modeling steps. First, we fit a propensity score model, which predicts the probability that you received a treatment or exposure (here, that a participant quit smoking). We use this model to calculate inverse probability weights--1 / your probability of treatment. Then, in the second step, we use this weights in the outcome model, which estimates the effect of exposure on the outcome (here, the effect of quitting smoking on gaining weight).
+Para un modelo IPW simple, tenemos dos pasos de modelado. Primero, ajustamos un modelo de puntuación de propensión, que predice la probabilidad de que recibieras el tratamiento o exposición (aquí, que un participante dejara de fumar). Usamos este modelo para calcular nuestros pesos de probabilidad inversa--1 / tu probabilidad de tratamiento. Luego, en el segundo paso, usamos estos pesos en el modelo de resultado, que estima el efecto de la exposición en el resultado (aquí, el efecto de dejar de fumar en el aumento de peso).
 
-For the propensity score model, we'll use logistic regression (since quitting smoking is a binary variable). The outcome is quitting smoking, and the variables in the model are all those included in our adjustment set. Then, we'll use `augment()` from {broom} (which calls `predict()` on the inside) to calculate our weights using `propensity::wt_ate()` and save it back into our data set. 
+Para el modelo de puntuación de propensión, usaremos regresión logística (dado que dejar de fumar es una variable binaria). El resultado es dejar de fumar, y las variables en el modelo son todas aquellas incluidas en nuestro conjunto de ajuste. Luego, usaremos `augment()` de {broom} (que llama a `predict()` por dentro) para calcular nuestros pesos usando `propensity::wt_ate()` y guardarlo de vuelta en nuestro conjunto de datos. 
 
 
 ```{r}
@@ -159,7 +159,7 @@ propensity_model <- glm(
 
 nhefs_complete_uc <- propensity_model |>
   # predict whether quit smoking
-  augment(type.predict = "response", data = nhefs_complete_uc) |>
+  augment(type.predict = "response", data = nhefs_complete_uc) |
   # calculate inverse probability
   mutate(wts = wt_ate(.fitted, qsmk))
 
@@ -167,7 +167,7 @@ nhefs_complete_uc |>
   select(qsmk, .fitted, wts)
 ```
 
-Let's look at the distribution of the weights.
+Veamos la distribución de los pesos.
 
 ```{r}
 ggplot(nhefs_complete_uc, aes(wts)) +
@@ -175,22 +175,22 @@ ggplot(nhefs_complete_uc, aes(wts)) +
   #  use a log scale for the x axis
   scale_x_log10() + 
   theme_minimal(base_size = 20) + 
-  xlab("Weights")
+  xlab("Pesos")
 ```
 
-It looks a little skewed, particularly that there are some participants with much higher weights. There are a few techniques for dealing with this--trimming weights and stabilizing weights--but we'll keep it simple for now and just use them as is.
+Se ve un poco sesgado, particularmente que hay algunos participantes con pesos mucho más altos. Hay varias técnicas para lidiar con esto--ortetimar pesos y estabilizar pesos-- pero lo mantendremos simple por ahora y los usaremos tal como están.
 
-The main goal here is to *break* the non-causal associations between quitting smoking and gaining weight--the other paths that might distort our results. In other words, if we succeed, there should be no differences in these variables between our two groups, those who quit smoking and those who didn't. This is where randomized trials shine; you can often assume that there is no baseline differences among potential confounders between your treatment groups (of course, no study is perfect, and there's a whole set of literature on dealing with this problem in randomized trials).
+El objetivo principal aquí es *romper* las asociaciones no causales entre dejar de fumar y ganar peso--los otros caminos que podrían distorsionar nuestros resultados. En otras palabras, si tenemos éxito, no debería haber diferencias en estas variables entre nuestros dos grupos, aquellos que dejaron de fumar y aquellos que no. Es donde los ensayos aleatorizados brillan; a menudo podemos asumir que no hay diferencias basales entre los grupos de tratamiento (obviamente, ningún estudio es perfecto, y hay un conjunto entero de literatura sobre cómo lidiar con este problema en ensayos aleatorizados).
 
-Standardized mean differences (SMD) are a simple measurement of differences that work across variable types. In general, the closer to 0 we are, the better job we have done eliminating the non-causal relationships we drew in our DAG. Note that low SMDs for everything we adjust for does *not* mean that there is not something else that might confound our study. Unmeasured confounders or misspecified DAGs can still distort our effects, even if our SMDs look great!
+Las diferencias estándar medias (SMD) son una medición simple de diferencias que funcionan en tipos de variables. En general, cuanto más cerca de 0, mejor trabajo hemos hecho eliminando las relaciones no causales que dibujamos en nuestro DAG. Ten en cuenta que bajos SMD para todo lo que ajustamos no significa que no haya algo más que pueda confundir nuestro estudio. Confounders no medidos o DAGs mal especificados aún pueden distorsionar nuestros efectos, incluso si nuestros SMD se ven geniales!
 
-We'll use the {halfmoon} package to calculate the SMDs, then visualize them.
+Usaremos el paquete {halfmoon} para calcular los SMD, luego visualizarlos.
 
 ```{r}
 vars <- c(
-  "sex", "race", "age", "education", 
-  "smokeintensity", "smokeyrs", 
-  "exercise", "active", "wt71"
+  "sexo", "raza", "edad", "educación", 
+  "intensidad\nfumador", "años\nfumando", 
+  "ejercicio", "actividad\ndiaria", "peso\nbaseline"
 )
 
 plot_df <- tidy_smd(
@@ -207,9 +207,9 @@ ggplot(
     geom_love()
 ```
 
-These look pretty good! Some variables are better than others, but weighting appears to have done a much better job eliminating these differences than an unadjusted analysis.
+Se ven bastante bien! Algunas variables son mejores que otras, pero el pesaje parece haber hecho un trabajo mucho mejor eliminando estas diferencias que un análisis sin ajustar.
 
-We can also use halfmoon's `geom_mirror_histogram()` to visualize the impact that the weights are having on our population.
+También podemos usar `geom_mirror_histogram()` de halfmoon para visualizar el impacto que los pesos están teniendo en nuestra población.
 
 ```{r}
 nhefs_complete_uc |>
@@ -225,35 +225,35 @@ nhefs_complete_uc |>
     alpha = .5
   ) +
   scale_y_continuous(labels = abs) +
-  labs(x = "propensity score") + 
+  labs(x = "puntuación de propensión") + 
   theme_minimal(base_size = 20)
 ```
 
-Both groups are being *upweighted* so that their distributions of propensity scores are much more similar.
+Ambos grupos están siendo *sobre-pesados* de modo que sus distribuciones de puntuaciones de propensión sean mucho más similares.
 
-We could do more here to analyze our assumptions, but let's move on to our second step: fitting the outcome model weighted by our inverse probabilities. Some researchers call these Marginal Structural Models, in part because the model is marginal; we only need to include our outcome (`wt82_71`) and exposure (`qsmk`). The other variables aren't in the model; they are accounted for with the IPWs!
+Podríamos hacer más aquí para analizar nuestras suposiciones, pero pasemos a nuestro segundo paso: ajustar el modelo de resultado ponderado por nuestras probabilidades inversas. Algunos investigadores llaman a estos Modelos Estructurales Marginales, en parte porque el modelo es marginal; solo necesitamos incluir nuestro resultado (`wt82_71`) y exposición (`qsmk`). Las otras variables no están en el modelo; están accounted por con los IPWs!
 
 ```{r}
 ipw_model <- lm(
   wt82_71 ~ qsmk, 
   data = nhefs_complete_uc, 
-  weights = wts # inverse probability weights
+  weights = wts # pesos de probabilidad inversa
 ) 
 
 ipw_estimate <- ipw_model |>
-  tidy(conf.int = TRUE) |>
+  tidy(conf.int = TRUE) |
   filter(term == "qsmk")
 
 ipw_estimate
 ```
 
-This estimate is pretty similar to what we saw before, if a little smaller. In fact, for simple causal questions, this is often the case: adjusting for confounders directly in your regression model sometimes estimates the same effect as IPWs and other causal techniques. Causal techniques are special, though, in that the use counterfactual modeling, which allows you to deal with many circumstances, such as when you have selection bias or time-dependendent confounding. They also often have variance properties.
+Este estimado es bastante similar a lo que vimos antes, si un poco más pequeño. De hecho, para preguntas causales simples, esto a menudo ocurre: ajustar los confounders directamente en tu modelo de regresión a veces estima el mismo efecto que IPWs y otras técnicas causales. Las técnicas causales son especiales, aunque, en que el uso modelado contrafactual, lo que te permite lidiar con muchas circunstancias, como cuando tienes sesgo de selección o confounding dependiente en el tiempo. También a menudo tienen propiedades de varianza.
 
-But we have other problem that we need to address. While we're just using `lm()` to estimate our IPW model, it doesn't properly account for the weights. That means our standard error is too small, which will artificially narrow confidence intervals and artificially shrink p-values. There are many ways to address this, including robust estimators. We'll focus on using the bootstrap via the {rsamples} package in this workshop, but here's one way to do it with robust standard errors:
+Pero tenemos otro problema que debemos abordar. Mientras usamos `lm()` para estimar nuestro modelo IPW, no cuenta adecuadamente los pesos. Eso significa que nuestro error estándar es demasiado pequeño, lo que estrechará artificialmente los intervalos de confianza y artificialmente contraerá los p-valores. Hay muchas maneras de abordar esto, incluyendo estimadores robustos. Nos centraremos en usar el bootstrap vía el paquete {rsample} en este taller, pero aquí hay una forma de hacerlo con errores estándar robustos:
 
 
 ```{r}
-# also see robustbase, survey, gee, and others
+# también ver robustbase, survey, gee, y otros
 library(estimatr)
 ipw_model_robust <- lm_robust( 
   wt82_71 ~ qsmk, 
@@ -262,19 +262,19 @@ ipw_model_robust <- lm_robust(
 ) 
 
 ipw_estimate_robust <- ipw_model_robust |>
-  tidy(conf.int = TRUE) |>
+  tidy(conf.int = TRUE) |
   filter(term == "qsmk")
 
 ipw_estimate_robust
 ```
 
-Now let's try the bootstrap. First, we need to wrap our model in a function so we can call it many times on our bootstrapped data. A function like this might be your instinct; however, it's not quite right.
+Ahora intentemos el bootstrap. Primero, necesitamos envolver nuestro modelo en una función para que podamos llamarlo muchas veces en nuestros datos bootstrapeados. Una función como esta podría ser tu instinto; sin embargo, no está del todo bien.
 
 ```{r}
-# fit ipw model for a single bootstrap sample
-fit_ipw_not_quite_rightly <- function(.split, ...) {
-  # get bootstrapped data frame
-  .df <- as.data.frame(.split)
+# ajusta el modelo IPW para una sola muestra bootstrap
+fit_ipw_not_quite_rightly <- function(split, ...) {
+  # get bootstrapped data sample with `rsample::analysis()`
+  .df <- analysis(split)
   
   # fit ipw model
   lm(wt82_71 ~ qsmk, data = .df, weights = wts) |>
@@ -282,14 +282,13 @@ fit_ipw_not_quite_rightly <- function(.split, ...) {
 }
 ```
 
-The problem is that we need to account for the *entire* modeling process, so we need to include the first step of our analysis -- fitting the inverse probability weights.
+El problema es que necesitamos contar con todo el proceso de modelado, así que necesitamos incluir el primer paso de nuestro análisis -- ajustar los pesos de probabilidad inversa.
 
 ```{r}
-fit_ipw <- function(.split, ...) {
-  # get bootstrapped data frame
-  .df <- as.data.frame(.split)
+fit_ipw <- function(split, ...) {
+  .df <- analysis(split)
   
-  # fit propensity score model
+  # ajusta el modelo de puntuación de propensión
   propensity_model <- glm(
     qsmk ~ sex + 
       race + age + I(age^2) + education + 
@@ -300,26 +299,26 @@ fit_ipw <- function(.split, ...) {
     data = .df
   )
   
-  # calculate inverse probability weights
+  # calcula los pesos de probabilidad inversa
   .df <- propensity_model |>
-    augment(type.predict = "response", data = .df) |>
+    augment(type.predict = "response", data = .df) |
     mutate(wts = wt_ate(
       .fitted,
       qsmk, 
       exposure_type = "binary"
     ))
   
-  # fit correctly bootstrapped ipw model
+  # ajusta el modelo IPW bootstrap correctamente
   lm(wt82_71 ~ qsmk, data = .df, weights = wts) |>
     tidy()
 }
 ```
 
-{rsample} makes the rest easy for us: `bootstraps()` resamples our data 1000 times, then we can use `purrr::map()` to apply our function to each resampled set (`splits`). {rsample}'s `int_*()` functions help us get confidence intervals for our estimate.
+{rsample} hace el resto fácil para nosotros: `bootstraps()` resamples nuestros datos 1000 veces, luego podemos usar `purrr::map()` para aplicar nuestra función a cada conjunto de datos resampleado (`splits`). {rsample}'s `int_*()` functions ayudan a obtener intervalos de confianza para nuestro estimado.
 
 ```{r}
-# fit ipw model to bootstrapped samples
-ipw_results <- bootstraps(nhefs_complete, 1000, apparent = TRUE) |>
+# ajusta el modelo IPW a las muestras bootstrap
+ipw_results <- bootstraps(nhefs_complete_uc, 1000, apparent = TRUE) |
   mutate(results = map(splits, fit_ipw))
 
 # get t-statistic-based CIs
@@ -329,25 +328,25 @@ boot_estimate <- int_t(ipw_results, results) |>
 boot_estimate
 ```
 
-Let's compare to our naive weighted model that just used a single estimate from `lm()`
+Comparemos con nuestro modelo de peso ingenuo que solo usó un estimado único de `lm()`
 
 ```{r}
 bind_rows(
   ipw_estimate |>
-    select(estimate, conf.low, conf.high) |>
+    select(estimate, conf.low, conf.high) |
     mutate(type = "ols"),
   ipw_estimate_robust |>
-    select(estimate, conf.low, conf.high) |>
+    select(estimate, conf.low, conf.high) |
     mutate(type = "robust"),
   boot_estimate |>
-    select(estimate = .estimate, conf.low = .lower, conf.high = .upper) |>
+    select(estimate = .estimate, conf.low = .lower, conf.high = .upper) |
     mutate(type = "bootstrap")
-) |>
+) |
   #  calculate CI width to sort by it
-  mutate(width = conf.high - conf.low) |>
-  arrange(width) |>
+  mutate(width = conf.high - conf.low) |
+  arrange(width) |
   #  fix the order of the model types for the plot  
-  mutate(type = fct_inorder(type)) |>
+  mutate(type = fct_inorder(type)) |
   ggplot(aes(x = type, y = estimate, ymin = conf.low, ymax = conf.high)) + 
     geom_pointrange(color = "#0172B1", size = 1, fatten = 3) +
     coord_flip() +
@@ -355,12 +354,12 @@ bind_rows(
     theme(axis.title.y = element_blank())
 ```
 
-Our bootstrapped confidence intervals are wider, which is expected; remember that they were artificially narrow in the naive OLS model!
+Nuestros intervalos de confianza bootstrap son más amplios, lo que es esperado; recuerda que eran artificialmente estrechos en el modelo OLS ingenuo!
 
-So, we have a final estimate for our causal effect: on average, a person who quits smoking will gain 3.5 kg (95% CI 2.4 kg, 4.4 kg) versus if they had not quit smoking. What do you think? Is this estimate reliable? Did we do a good job addressing the assumptions we need to make for a causal effect, particularly that there is no confounding? How might you criticize this model, and what would you do differently? 
+Así que tenemos una estimación final para nuestro efecto causal: en promedio, una persona que deja de fumar ganará 3.5 kg (IC 95% 2.4 kg, 4.4 kg) versus si no hubiera dejado de fumar. ¿Qué piensas? ¿Es este estimado confiable? ¿Hicimos un buen trabajo abordando las suposiciones que necesitamos para un efecto causal, particularmente que no hay confounders? ¿Cómo podrías criticar este modelo, y qué harías diferente? 
 
 ***
 
-# Take aways
-* The broad strokes for a causal analysis are: 1) identify your causal question 2) make your assumptions clear 3) check your assumptions as best you can and 4) use the right estimator for the question you're trying to ask. As scientists, we should be able to critique each of these steps, and that's a good thing!
-* To create marginal structural models, first fit a propensity model for the weights with the exposure as the outcome. Then, use the inverse of the predicted probabilities as weights in a model with just the outcome and exposure.
+# Lecciones aprendidas
+* Los pasos generales para un análisis causal son: 1) identificar tu pregunta causal 2) hacer claras tus suposiciones 3) verificar tus suposesas lo mejor que puedas y 4) usar el estimador correcto para la pregunta que estás intentando responder. Como científicos, debemos ser capaces de criticar cada uno de estos pasos, y eso es una cosa buena!
+* Para crear modelos marginales estructurales, primero ajusta un modelo de propensión para los pesos con la exposición como resultado. Luego, usa el inverso de las probabilidades predichas como pesos en un modelo con solo el resultado y la exposición.

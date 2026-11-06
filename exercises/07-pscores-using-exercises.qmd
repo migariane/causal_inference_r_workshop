@@ -1,5 +1,5 @@
 ---
-title: "Using Propensity Scores"
+title: "Usando Puntuaciones de Propensión"
 format: html
 ---
 
@@ -13,9 +13,9 @@ library(propensity)
 library(halfmoon)
 ```
 
-We are interested in examining the relationship between whether there were "Extra Magic Hours" in the morning (the **exposure**) and the average wait time for the Seven Dwarfs Mine Train the same day between 9am and 10am (the **outcome**).
+Estamos interesados en examinar la relación entre si hubo "Horas Mágicas Extra" por la mañana (la **exposición**) y el tiempo de espera promedio para el Seven Dwarfs Mine Train el mismo día entre las 9am y las 10am (el **resultado**).
 
-Below is the propensity score model you created in the previous exercise.
+A continuación se muestra el modelo de puntuación de propensión que creaste en el ejercicio anterior.
 
 ```{r}
 seven_dwarfs <- seven_dwarfs_train_2018 |>
@@ -31,13 +31,13 @@ seven_dwarfs_prop <- propensity_model |>
   augment(type.predict = "response", data = seven_dwarfs)
 ```
 
-## Your Turn 1 (Matching)
+## Tu Turno 1 (Emparejamiento)
 
-Create at "matched" data set using the same propensity score model as above and a caliper of 0.2. 
+Crea un conjunto de datos "emparejados" usando el mismo modelo de puntuación de propensión que el anterior y un caliper de 0.2. 
 
-1. Provide `matchit()` the formula for the propensity score.
-2. Using the `link` and `caliper` arguments, create a caliper of 0.2 SDs on the linear logit scale.
-3. Extract the matched datasets into a new data frame called `matched_df`.
+1. Proporciona a `matchit()` la fórmula para la puntuación de propensión.
+2. Usando los argumentos `link` y `caliper`, crea un caliper de 0.2 SD en la escala lineal logit.
+3. Extrae los conjuntos de datos emparejados en un nuevo data frame llamado `matched_df`.
 
 ```{r}
 library(MatchIt)
@@ -51,9 +51,9 @@ matched_dwarfs <- matchit(
 matched_df <- ___(matched_dwarfs)
 ```
 
-## Your Turn 2 (Weighting)
+## Tu Turno 2 (Ponderación)
 
-Add the ATE weights to the data frame, `seven_dwarfs_prop`
+Agrega los pesos ATE al data frame, `seven_dwarfs_prop`
 
 ```{r}
 seven_dwarfs_prop <- seven_dwarfs_prop |>
@@ -63,7 +63,7 @@ seven_dwarfs_prop <- seven_dwarfs_prop |>
 
 Stretch Goal 1: 
 
-Add ATM weights to the data frame, `seven_dwarfs_prop`
+Agrega pesos ATM al data frame, `seven_dwarfs_prop`
 
 ```{r}
 seven_dwarfs_prop <- seven_dwarfs_prop |>
@@ -72,7 +72,7 @@ seven_dwarfs_prop <- seven_dwarfs_prop |>
 
 Stretch Goal 2: 
 
-Update the code below to examine the distribution of the weighted sample. **HINT** the part that needs to be updated is the `weight` parameter in two of the `geom_mirror_histogram()` call.
+Actualiza el código abajo para examinar la distribución de la muestra ponderada. **PISTA** la parte que necesita ser actualizada es el parámetro `weight` en dos de las llamadas `geom_mirror_histogram()`.
 
 
 ```{r}
@@ -95,5 +95,5 @@ seven_dwarfs_prop |>
   theme_minimal() +
   scale_y_continuous(labels = abs) +
   scale_fill_manual(values = c("blue", "green")) +
-  labs(x = "p", fill = "Extra Magic Morning")
+  labs(x = "p", fill = "Horas Mágicas Extra por la Mañana")
 ```
