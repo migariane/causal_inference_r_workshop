@@ -15,21 +15,21 @@ knitr::opts_chunk$set(
 
 ### Diapositivas
 
-* [00 Introducción](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/00-intro.qmd)
-* [01 Modelo Causal: Whole Game](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/01-causal_modeling_whole_game.qmd)
-* [02 Cuando los métodos estándar funcionan](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/02-when-standard-methods-succeed.qmd)
-* [03 Inferencia Causal con `group_by` y `summarise`](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/03-causal-inference-with-group-by-and-summarise.qmd)
-* [04 Diagramas Causales](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/04-dags.qmd)
-* [05 La Inferencia Causal no es solo un Problema de Estadística](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/05-quartets.qmd)
-* [06 Introducción a las Puntuaciones de Propensión](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/06-pscores.qmd)
-* [07 Usando las Puntuaciones de Propensión](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/07-using-pscores.qmd)
-* [08 Verificando las Puntuaciones de Propensión](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/08-pscore-diagnostics.qmd)
-* [09 Ajustando el Modelo de Resultado](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/09-outcome-model.qmd)
-* [10 Exposiciones Continuas y G-Computación](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/10-continuous-g-comp.qmd)
-* [11 Análisis de Sensibilidad de Puntos de Inflexión](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/11-tipr.qmd)
-* [12 Whole Game (Tu turno)](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/12-whole_game-2.qmd)
-* [13 Bonus: Sesgo de Selección](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/13-bonus-selection-bias.qmd)
-* [14 Bonus: Exposiciones Continuas con Puntuaciones de Propensión](https://github.com/migariane/causal_inference_r_workshop/blob/main/slides/raw/14-bonus-continuous-pscores.qmd)
+* [00 Introducción](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/00-intro.qmd)
+* [01 Modelo Causal: Whole Game](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/01-causal_modeling_whole_game.qmd)
+* [02 Cuando los métodos estándar funcionan](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/02-when-standard-methods-succeed.qmd)
+* [03 Inferencia Causal con `group_by` y `summarise`](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/03-causal-inference-with-group-by-and-summarise.qmd)
+* [04 Diagramas Causales](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/04-dags.qmd)
+* [05 La Inferencia Causal no es solo un Problema de Estadística](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/05-quartets.qmd)
+* [06 Introducción a las Puntuaciones de Propensión](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/06-pscores.qmd)
+* [07 Usando las Puntuaciones de Propensión](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/07-using-pscores.qmd)
+* [08 Verificando las Puntuaciones de Propensión](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/08-pscore-diagnostics.qmd)
+* [09 Ajustando el Modelo de Resultado](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/09-outcome-model.qmd)
+* [10 Exposiciones Continuas y G-Computación](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/10-continuous-g-comp.qmd)
+* [11 Análisis de Sensibilidad de Puntos de Inflexión](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/11-tipr.qmd)
+* [12 Whole Game (Tu turno)](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/12-whole_game-2.qmd)
+* [13 Bonus: Sesgo de Selección](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/13-bonus-selection-bias.qmd)
+* [14 Bonus: Exposiciones Continuas con Puntuaciones de Propensión](https://github.com/migariane/causal_inference_r_workshop/blob/master/slides/raw/14-bonus-continuous-pscores.qmd)
 
 ### Instalación de materiales localmente
 
